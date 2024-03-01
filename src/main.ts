@@ -1,5 +1,29 @@
 import { showUI } from '@create-figma-plugin/utilities'
 
+// 設定
+const fontSettings = {
+  h1: {
+    size: 100,
+    family: 'Noto Sans JP',
+    style: 'Bold',
+  },
+  h2: {
+    size: 56,
+    family: 'Noto Sans JP',
+    style: 'Bold',
+  },
+  h3: {
+    size: 48,
+    family: 'Noto Sans JP',
+    style: 'Bold',
+  },
+  base: {
+    size: 40,
+    family: 'Noto Sans JP',
+    style: 'Bold',
+  }
+};
+
 export default function () {
   showUI({
     height: 240,
@@ -19,6 +43,8 @@ figma.ui.onmessage = async (msg) => {
         console.log('「ひな形」という名前のフレームが見つかりませんでした。');
         return;
       }
+      await figma.loadFontAsync({ family: "Inter", style: "Regular" });
+      await figma.loadFontAsync({ family: "Noto Sans JP", style: "Bold" });
 
       // テキストを '---' で分割し、最初のヘッダー部分と最初のセクションを除去
       const sections = text.split('---').slice(2);
@@ -36,14 +62,18 @@ figma.ui.onmessage = async (msg) => {
         let textNodes = [];
 
         for (const line of lines) {
-          let fontSize = 40;
-          if (line.startsWith('# ')) fontSize = 100;
-          else if (line.startsWith('## ')) fontSize = 56;
-          else if (line.startsWith('### ')) fontSize = 48;
+          let fontSetting = fontSettings.base;
+          if (line.startsWith('# ')) {
+            fontSetting = fontSettings.h1;
+          } else if (line.startsWith('## ')) {
+            fontSetting = fontSettings.h2;
+          } else if (line.startsWith('### ')) {
+            fontSetting = fontSettings.h3;
+          }
 
           const textNode = figma.createText();
-          await figma.loadFontAsync({ family: "Inter", style: "Regular" });
-          textNode.fontSize = fontSize;
+          textNode.fontSize = fontSetting.size;
+          textNode.fontName = { family: fontSetting.family, style: fontSetting.style };
           textNode.characters = line.replace(/^#+\s/, '');
           if ('appendChild' in clonedFrame) {
             clonedFrame.appendChild(textNode);
