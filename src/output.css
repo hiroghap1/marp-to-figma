@@ -544,6 +544,10 @@ video {
   --tw-backdrop-sepia:  ;
 }
 
+.resize {
+  resize: both;
+}
+
 .border {
   border-width: 1px;
 }

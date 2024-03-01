@@ -1,4 +1,4 @@
-# Preact Tailwind Css
+# Marp to Figma
 
 ## Development guide
 
