@@ -33,10 +33,39 @@ export default function () {
 
 figma.ui.onmessage = async (msg) => {
   if (msg.type === 'upload-md') {
-    const text = msg.content; // UIから送信されたファイルの内容
+    const text = msg.content;
+    const sections = text.split('---');
+    const headerSection = sections[1];
+    const lines = headerSection.split('\n');
+    const config:{[key: string]: string} = {};
+
+    for (const line of lines) {
+      const [key, rawValue] = line.split(':').map((part: string) => part.trim());
+      if (key && rawValue) {
+        let value: any = rawValue;
+
+        // "true"または"false"の文字列をブール値に変換
+        if (rawValue === "true" || rawValue === "false") {
+          value = rawValue === "true";
+        }
+
+        // 数値の文字列を数値に変換
+        else if (!isNaN(Number(rawValue))) {
+          value = Number(rawValue);
+        }
+
+        // クォーテーションで囲まれた文字列からクォーテーションを削除
+        else if (rawValue.startsWith('"') && rawValue.endsWith('"')) {
+          value = rawValue.slice(1, -1);
+        }
+
+        config[key] = value;
+      }
+    }
+    console.log(config);
 
     // Markdownテキストが特定のヘッダーで始まるかどうかをチェック
-    if (text.startsWith('---\nmarp: true\n---')) {
+    if (typeof config['marp'] === 'boolean' && config['marp'] === true) {
       // 'ひな形'という名前のフレームを検索
       const templateFrame = figma.currentPage.findOne(node => node.type === "FRAME" && node.name === "ひな形");
       if (!templateFrame) {
@@ -46,8 +75,8 @@ figma.ui.onmessage = async (msg) => {
       await figma.loadFontAsync({ family: "Inter", style: "Regular" });
       await figma.loadFontAsync({ family: "Noto Sans JP", style: "Bold" });
 
-      // テキストを '---' で分割し、最初のヘッダー部分と最初のセクションを除去
-      const sections = text.split('---').slice(2);
+      // 最初のヘッダー部分と最初のセクションを除去
+      sections.slice(2);
 
       let row = 0; // 現在の行
       let column = 0; // 現在の列

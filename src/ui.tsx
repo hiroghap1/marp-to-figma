@@ -45,8 +45,9 @@ function Plugin () {
 
           config[key] = value;
         }
-      }      console.log(config);
-      if (config['marp']?.replace(/"/g, '') === 'true') {
+      }
+
+      if (typeof config['marp'] === 'boolean' && config['marp'] === true) {
         parent.postMessage({ pluginMessage: { type: 'upload-md', content } }, '*');
       } else {
         setErrorMessage('このファイルはMarp対応のMarkdownフォーマットではありません。');
