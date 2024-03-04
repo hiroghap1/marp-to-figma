@@ -76,7 +76,7 @@ figma.ui.onmessage = async (msg) => {
       await figma.loadFontAsync({ family: "Noto Sans JP", style: "Bold" });
 
       // 最初のヘッダー部分と最初のセクションを除去
-      sections.slice(2);
+      sections.splice(0, 2);
 
       let row = 0; // 現在の行
       let column = 0; // 現在の列
@@ -104,6 +104,7 @@ figma.ui.onmessage = async (msg) => {
           textNode.fontSize = fontSetting.size;
           textNode.fontName = { family: fontSetting.family, style: fontSetting.style };
           textNode.characters = line.replace(/^#+\s/, '');
+          // textNode.fills = [{ type: 'SOLID', color: { r: 30, g: 30, b: 30 } }];
           if ('appendChild' in clonedFrame) {
             clonedFrame.appendChild(textNode);
           }
