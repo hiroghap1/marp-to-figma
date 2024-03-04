@@ -104,7 +104,19 @@ figma.ui.onmessage = async (msg) => {
           textNode.fontSize = fontSetting.size;
           textNode.fontName = { family: fontSetting.family, style: fontSetting.style };
           textNode.characters = line.replace(/^#+\s/, '');
-          // textNode.fills = [{ type: 'SOLID', color: { r: 30, g: 30, b: 30 } }];
+          if (config['color'] && /^#[0-9a-fA-F]{6}$/.test(config['color'])) {
+            const rHex = config['color'].substring(1, 3);
+            const gHex = config['color'].substring(3, 5);
+            const bHex = config['color'].substring(5, 7);
+            const r = parseInt(rHex, 16) / 255;
+            const g = parseInt(gHex, 16) / 255;
+            const b = parseInt(bHex, 16) / 255;
+            const fills: SolidPaint[] = [{
+              type: "SOLID" as "SOLID", // 'type' プロパティを "SOLID" リテラル型として扱う
+              color: { r, g, b }
+            }];
+            textNode.setRangeFills(0, textNode.characters.length, fills);
+          }
           if ('appendChild' in clonedFrame) {
             clonedFrame.appendChild(textNode);
           }
