@@ -82,58 +82,60 @@ figma.ui.onmessage = async (msg) => {
       let column = 0; // 現在の列
 
       for (let i = 0; i < sections.length; i++) {
-        const lines = sections[i].trim().split('\n');
         // フレームを複製して連番の名前を付ける
         const clonedFrame = templateFrame.clone();
         clonedFrame.name = `Slide ${(i + 1).toString().padStart(3, '0')}`; // 001, 002, ...
-
-        let totalTextHeight = 0;
         let textNodes = [];
 
-        for (const line of lines) {
-          let fontSetting = fontSettings.base;
-          if (line.startsWith('# ')) {
-            fontSetting = fontSettings.h1;
-          } else if (line.startsWith('## ')) {
-            fontSetting = fontSettings.h2;
-          } else if (line.startsWith('### ')) {
-            fontSetting = fontSettings.h3;
+        const lines = sections[i].trim().split('\n').filter((line: any) => line); // 空の行を除外
+        let totalTextHeight = 0;
+
+        if(lines.length > 0) {
+          for (const line of lines) {
+            let fontSetting = fontSettings.base;
+            if (line.startsWith('# ')) {
+              fontSetting = fontSettings.h1;
+            } else if (line.startsWith('## ')) {
+              fontSetting = fontSettings.h2;
+            } else if (line.startsWith('### ')) {
+              fontSetting = fontSettings.h3;
+            }
+
+            const textNode = figma.createText();
+            textNode.fontSize = fontSetting.size;
+            textNode.fontName = { family: fontSetting.family, style: fontSetting.style };
+            textNode.characters = line.replace(/^#+\s/, '');
+            if (config['color'] && /^#[0-9a-fA-F]{6}$/.test(config['color'])) {
+              const rHex = config['color'].substring(1, 3);
+              const gHex = config['color'].substring(3, 5);
+              const bHex = config['color'].substring(5, 7);
+              const r = parseInt(rHex, 16) / 255;
+              const g = parseInt(gHex, 16) / 255;
+              const b = parseInt(bHex, 16) / 255;
+              const fills: SolidPaint[] = [{
+                type: "SOLID" as "SOLID", // 'type' プロパティを "SOLID" リテラル型として扱う
+                color: { r, g, b }
+              }];
+              textNode.setRangeFills(0, textNode.characters.length, fills);
+            }
+            if ('appendChild' in clonedFrame) {
+              clonedFrame.appendChild(textNode);
+            }
+            // await textNode.syncFontGeometryWithTextAsync();
+
+            totalTextHeight += textNode.height;
+            textNodes.push(textNode);
           }
 
-          const textNode = figma.createText();
-          textNode.fontSize = fontSetting.size;
-          textNode.fontName = { family: fontSetting.family, style: fontSetting.style };
-          textNode.characters = line.replace(/^#+\s/, '');
-          if (config['color'] && /^#[0-9a-fA-F]{6}$/.test(config['color'])) {
-            const rHex = config['color'].substring(1, 3);
-            const gHex = config['color'].substring(3, 5);
-            const bHex = config['color'].substring(5, 7);
-            const r = parseInt(rHex, 16) / 255;
-            const g = parseInt(gHex, 16) / 255;
-            const b = parseInt(bHex, 16) / 255;
-            const fills: SolidPaint[] = [{
-              type: "SOLID" as "SOLID", // 'type' プロパティを "SOLID" リテラル型として扱う
-              color: { r, g, b }
-            }];
-            textNode.setRangeFills(0, textNode.characters.length, fills);
-          }
-          if ('appendChild' in clonedFrame) {
-            clonedFrame.appendChild(textNode);
-          }
-          // await textNode.syncFontGeometryWithTextAsync();
+          let currentY = (clonedFrame.height - totalTextHeight) / 2;
+          textNodes.forEach(node => {
+            node.y = currentY;
+            currentY += node.height;
 
-          totalTextHeight += textNode.height;
-          textNodes.push(textNode);
+            // テキストノードをフレームの中央に配置（左右）
+            node.x = (clonedFrame.width - node.width) / 2;
+          });
         }
-
-        let currentY = (clonedFrame.height - totalTextHeight) / 2;
-        textNodes.forEach(node => {
-          node.y = currentY;
-          currentY += node.height;
-
-          // テキストノードをフレームの中央に配置（左右）
-          node.x = (clonedFrame.width - node.width) / 2;
-        });
 
         if (i % 10 === 0 && i !== 0) {
           row++;
