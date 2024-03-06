@@ -92,14 +92,7 @@ figma.ui.onmessage = async (msg) => {
 
         if(lines.length > 0) {
           for (const line of lines) {
-            let fontSetting = fontSettings.base;
-            if (line.startsWith('# ')) {
-              fontSetting = fontSettings.h1;
-            } else if (line.startsWith('## ')) {
-              fontSetting = fontSettings.h2;
-            } else if (line.startsWith('### ')) {
-              fontSetting = fontSettings.h3;
-            }
+            const fontSetting = setFontSetting(line);
 
             const textNode = figma.createText();
             textNode.fontSize = fontSetting.size;
@@ -151,3 +144,16 @@ figma.ui.onmessage = async (msg) => {
     }
   }
 };
+
+function setFontSetting(line: string) {
+  let fontSetting = fontSettings.base;
+  if (line.startsWith('# ')) {
+    fontSetting = fontSettings.h1;
+  } else if (line.startsWith('## ')) {
+    fontSetting = fontSettings.h2;
+  } else if (line.startsWith('### ')) {
+    fontSetting = fontSettings.h3;
+  }
+
+  return fontSetting;
+}
