@@ -161,10 +161,9 @@ function applyThemeSettingsRaiseTech(sections: string | any[], templateFrame: {
       if(h2Group) h2Group.remove();
     }
 
-    console.log('ここまでは北？');
-    console.log(lines);
     if(lines.length > 0) {
       for (const line of lines) {
+        if(line === '') continue;
         const fontSetting = setFontSetting(line);
 
         const textNode = figma.createText();
