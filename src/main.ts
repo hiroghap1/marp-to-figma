@@ -148,7 +148,7 @@ function applyThemeSettingsRaiseTech(sections: string | any[], templateFrame: {
         }
       }
       lines.shift(); // h1行を削除して残りの処理を続行
-      if(lines[0].startsWith('## ')) {
+      if(lines[0] && lines[0].startsWith('## ')) {
 
       } else {
         const h2Group = clonedFrame.findOne((node: { name: string; }) => node.name === '子見出し') as unknown as FrameNode;
@@ -190,16 +190,15 @@ function applyThemeSettingsRaiseTech(sections: string | any[], templateFrame: {
 
         totalTextHeight += textNode.height;
         textNodes.push(textNode);
+        let currentY = (clonedFrame.height - totalTextHeight) / 2;
+        textNodes.forEach(node => {
+          node.y = currentY;
+          currentY += node.height;
+
+          // テキストノードをフレームの中央に配置（左右）
+          node.x = (clonedFrame.width - node.width) / 2;
+        });
       }
-
-      let currentY = (clonedFrame.height - totalTextHeight) / 2;
-      textNodes.forEach(node => {
-        node.y = currentY;
-        currentY += node.height;
-
-        // テキストノードをフレームの中央に配置（左右）
-        node.x = (clonedFrame.width - node.width) / 2;
-      });
     }
 
     if (i % 10 === 0 && i !== 0) {
