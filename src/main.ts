@@ -80,6 +80,7 @@ function parseHeaderSection(headerSection: string): { [key: string]: any } {
 async function loadFonts() {
   await figma.loadFontAsync({ family: "Inter", style: "Regular" });
   await figma.loadFontAsync({ family: "Noto Sans JP", style: "Bold" });
+  await figma.loadFontAsync({ family: "Noto Sans JP", style: "Medium" });
   await figma.loadFontAsync({ family: "Noto Sans", style: "SemiBold" });
 }
 
@@ -149,7 +150,15 @@ function applyThemeSettingsRaiseTech(sections: string | any[], templateFrame: {
       }
       lines.shift(); // h1行を削除して残りの処理を続行
       if(lines[0] && lines[0].startsWith('## ')) {
-
+        console.log('h2あり');
+        const smallHeadlineNode = findSmallHeadlineNode(clonedFrame);
+        if(smallHeadlineNode) {
+          const smallHeadlineText = lines[0].substring(3).trim();
+          console.log('ここまできた？',smallHeadlineText);
+          smallHeadlineNode.characters = smallHeadlineText;
+          console.log('ここまできた？');
+          lines.shift(); // h2行を削除して残りの処理を続行
+        }
       } else {
         const h2Group = clonedFrame.findOne((node: { name: string; }) => node.name === '子見出し') as unknown as FrameNode;
         if(h2Group) h2Group.remove();
@@ -239,5 +248,9 @@ function findHeadlineNode(frame: FrameNode): TextNode | null {
 function findHeadlineNumberNode(frame: FrameNode): TextNode | null {
   const headlineNumberGroup = frame.findOne(node => node.name === "01") as unknown as TextNode;
   return headlineNumberGroup;
+}
 
+function findSmallHeadlineNode(frame: FrameNode) {
+  const smallHeadlineGroup = frame.findOne(node => node.name === "小見出しが入ります") as unknown as TextNode;
+  return smallHeadlineGroup;
 }
